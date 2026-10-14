@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 
 int main() {
-    // 1. Initialize the render window with 800x600 resolution and title 'KnightForge'
-    sf::RenderWindow window(sf::VideoMode(800, 600), "KnightForge");
+    // 1. Initialize the render window with 800x600 resolution and title '64 Squares'
+    sf::RenderWindow window(sf::VideoMode(800, 600), "64 Squares");
     window.setFramerateLimit(60);
 
     // 2. Main application event and render loop
