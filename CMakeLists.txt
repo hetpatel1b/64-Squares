@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(KnightForge
+project(sixty_four_squares
     VERSION 0.1.0
-    DESCRIPTION "C++ Chess Application using SFML"
+    DESCRIPTION "64 Squares — C++ Chess Application using SFML"
     LANGUAGES CXX
 )
 
@@ -45,29 +45,29 @@ endif()
 # ------------------------------------------------------------------------------
 # 3. Application Target
 # ------------------------------------------------------------------------------
-add_executable(KnightForge
+add_executable(sixty_four_squares
     src/main.cpp
 )
 
 # Target-scoped include paths
-target_include_directories(KnightForge PRIVATE
+target_include_directories(sixty_four_squares PRIVATE
     ${PROJECT_SOURCE_DIR}/include
 )
 
 # Target-scoped compiler features
-target_compile_features(KnightForge PRIVATE
+target_compile_features(sixty_four_squares PRIVATE
     cxx_std_17
 )
 
 # Target-scoped SFML module linkage
 if(TARGET sfml-graphics)
-    target_link_libraries(KnightForge PRIVATE
+    target_link_libraries(sixty_four_squares PRIVATE
         sfml-graphics
         sfml-window
         sfml-system
     )
 elseif(TARGET SFML::Graphics)
-    target_link_libraries(KnightForge PRIVATE
+    target_link_libraries(sixty_four_squares PRIVATE
         SFML::Graphics
         SFML::Window
         SFML::System
@@ -80,10 +80,10 @@ endif()
 # 4. Runtime DLL Deployment (Only active when BUILD_SHARED_LIBS is ON)
 # ------------------------------------------------------------------------------
 if(BUILD_SHARED_LIBS)
-    add_custom_command(TARGET KnightForge POST_BUILD
+    add_custom_command(TARGET sixty_four_squares POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:KnightForge>
-            $<TARGET_FILE_DIR:KnightForge>
+            $<TARGET_RUNTIME_DLLS:sixty_four_squares>
+            $<TARGET_FILE_DIR:sixty_four_squares>
         COMMAND_EXPAND_LISTS
         COMMENT "Copying runtime shared library DLLs to executable directory..."
     )

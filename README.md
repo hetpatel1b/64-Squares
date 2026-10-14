@@ -1,6 +1,6 @@
-# KnightForge
+# 64 Squares
 
-KnightForge is a modern desktop chess application built in C++ utilizing the SFML graphics and windowing library. Developed collaboratively by a three-member engineering team, the project emphasizes modular architecture, robust game state management, and smooth interactive gameplay.
+64 Squares is a modern desktop chess application built in C++ utilizing the SFML graphics and windowing library. Developed collaboratively by a three-member engineering team, the project emphasizes modular architecture, robust game state management, and smooth interactive gameplay.
 
 ---
 
@@ -39,11 +39,11 @@ The project uses CMake with Ninja. CMake automatically resolves and compiles SFM
 # 1. Configure the project build tree using Ninja
 cmake -S . -B build -G "Ninja"
 
-# 2. Compile KnightForge
+# 2. Compile sixty_four_squares
 cmake --build build
 
 # 3. Execute the binary
-./build/KnightForge.exe
+./build/sixty_four_squares.exe
 ```
 
 > **Note on Static Linking:** By default, `BUILD_SHARED_LIBS` is set to `OFF`, producing a self-contained executable with zero external SFML runtime DLL dependencies. If shared libraries are desired, pass `-DBUILD_SHARED_LIBS=ON` during configuration (CMake will automatically deploy the required DLLs to the build folder).
@@ -53,7 +53,7 @@ cmake --build build
 ## Repository Structure
 
 ```text
-KnightForge/
+64-Squares/
 ├── assets/
 │   ├── pieces/         # Chess piece sprites and graphics
 │   └── fonts/          # UI typography assets
@@ -64,6 +64,7 @@ KnightForge/
 ├── saves/              # Local game save files (ignored by Git)
 ├── CMakeLists.txt      # Root CMake configuration
 ├── README.md           # Project documentation
+├── GUIDE.md            # Comprehensive installation and setup guide
 └── .gitignore          # Build, binary, and OS ignore patterns
 ```
 
@@ -75,7 +76,8 @@ To maintain clean and traceable collaboration among all three teammates:
 
 1. **Clone the repository:**
    ```powershell
-   git clone https://github.com/hetpatel1b/64-Squares.git KnightForge
+   git clone https://github.com/hetpatel1b/64-Squares.git
+   cd 64-Squares
    ```
 2. **Create a feature branch:**
    ```powershell
