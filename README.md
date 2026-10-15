@@ -39,11 +39,14 @@ The project uses CMake with Ninja. CMake automatically resolves and compiles SFM
 # 1. Configure the project build tree using Ninja
 cmake -S . -B build -G "Ninja"
 
-# 2. Compile sixty_four_squares
+# 2. Compile 64Squares development executable and test suite
 cmake --build build
 
-# 3. Execute the binary
-./build/sixty_four_squares.exe
+# 3. Execute the 64Squares binary
+./build/64Squares.exe
+
+# 4. Run automated test suite
+ctest --test-dir build --output-on-failure
 ```
 
 > **Note on Static Linking:** By default, `BUILD_SHARED_LIBS` is set to `OFF`, producing a self-contained executable with zero external SFML runtime DLL dependencies. If shared libraries are desired, pass `-DBUILD_SHARED_LIBS=ON` during configuration (CMake will automatically deploy the required DLLs to the build folder).

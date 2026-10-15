@@ -1,26 +1,30 @@
-#include <SFML/Graphics.hpp>
+
+#include "ChessEngine.hpp"
+#include <iostream>
 
 int main() {
-    // 1. Initialize the render window with 800x600 resolution and title '64 Squares'
-    sf::RenderWindow window(sf::VideoMode(800, 600), "64 Squares");
-    window.setFramerateLimit(60);
+    ChessEngine game;
 
-    // 2. Main application event and render loop
-    while (window.isOpen()) {
-        // Process pending OS window events
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-        }
+    const ChessBoard& board = game.getBoard();
 
-        // Clear the frame with a clean dark background color
-        window.clear(sf::Color(28, 28, 30));
+    std::cout << "64 Squares Phase 2\n";
 
-        // Present rendered frame buffer
-        window.display();
+    const Piece* p = board.getPiece({7, 1});
+
+    if (p != nullptr &&
+        p->getType() == PieceType::Knight) {
+        std::cout << "Initial position: OK\n";
     }
+
+    bool ok = game.tryMove({7, 1}, {5, 2});
+
+    std::cout << "Knight move: "
+              << (ok ? "Accepted" : "Rejected")
+              << '\n';
+
+    std::cout << "Black to move: "
+              << (game.getTurn() == Color::Black)
+              << '\n';
 
     return 0;
 }

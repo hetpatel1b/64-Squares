@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(sixty_four_squares
+project(SixtyFourSquares
     VERSION 0.1.0
-    DESCRIPTION "64 Squares — C++ Chess Application using SFML"
+    DESCRIPTION "64 Squares — C++ Chess Application"
     LANGUAGES CXX
 )
 
@@ -43,47 +43,66 @@ if(NOT SFML_FOUND)
 endif()
 
 # ------------------------------------------------------------------------------
-# 3. Application Target
+# 3. Core Engine Library Target
 # ------------------------------------------------------------------------------
-add_executable(sixty_four_squares
-    src/main.cpp
+add_library(sixty_four_squares STATIC
+    src/ChessBoard.cpp
+    src/ChessEngine.cpp
 )
 
 # Target-scoped include paths
-target_include_directories(sixty_four_squares PRIVATE
+target_include_directories(sixty_four_squares PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
 # Target-scoped compiler features
-target_compile_features(sixty_four_squares PRIVATE
+target_compile_features(sixty_four_squares PUBLIC
     cxx_std_17
 )
 
-# Target-scoped SFML module linkage
-if(TARGET sfml-graphics)
-    target_link_libraries(sixty_four_squares PRIVATE
-        sfml-graphics
-        sfml-window
-        sfml-system
-    )
-elseif(TARGET SFML::Graphics)
-    target_link_libraries(sixty_four_squares PRIVATE
-        SFML::Graphics
-        SFML::Window
-        SFML::System
-    )
-else()
-    message(FATAL_ERROR "SFML targets could not be resolved.")
-endif()
+# ------------------------------------------------------------------------------
+# 4. Development Application Target
+# ------------------------------------------------------------------------------
+add_executable(64Squares
+    src/main.cpp
+)
+
+target_link_libraries(64Squares PRIVATE
+    sixty_four_squares
+)
+
+set_target_properties(64Squares PROPERTIES
+    OUTPUT_NAME "64Squares"
+)
 
 # ------------------------------------------------------------------------------
-# 4. Runtime DLL Deployment (Only active when BUILD_SHARED_LIBS is ON)
+# 5. Automated Tests Target
 # ------------------------------------------------------------------------------
-if(BUILD_SHARED_LIBS)
-    add_custom_command(TARGET sixty_four_squares POST_BUILD
+enable_testing()
+
+add_executable(sixty_four_squares_tests
+    tests/Phase2Tests.cpp
+)
+
+target_link_libraries(sixty_four_squares_tests PRIVATE
+    sixty_four_squares
+)
+
+set_target_properties(sixty_four_squares_tests PROPERTIES
+    OUTPUT_NAME "sixty_four_squares_tests"
+)
+
+add_test(NAME "64Squares_Phase2_Tests" COMMAND sixty_four_squares_tests)
+set_tests_properties("64Squares_Phase2_Tests" PROPERTIES LABELS "64 Squares")
+
+# ------------------------------------------------------------------------------
+# 6. Runtime DLL Deployment (Only active when BUILD_SHARED_LIBS is ON)
+# ------------------------------------------------------------------------------
+if(BUILD_SHARED_LIBS AND TARGET sfml-graphics)
+    add_custom_command(TARGET 64Squares POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:sixty_four_squares>
-            $<TARGET_FILE_DIR:sixty_four_squares>
+            $<TARGET_RUNTIME_DLLS:64Squares>
+            $<TARGET_FILE_DIR:64Squares>
         COMMAND_EXPAND_LISTS
         COMMENT "Copying runtime shared library DLLs to executable directory..."
     )
