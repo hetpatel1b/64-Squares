@@ -1,30 +1,21 @@
-
+#include "BoardView.hpp"
 #include "ChessEngine.hpp"
-#include <iostream>
 
 int main() {
-    ChessEngine game;
+    // 1. Initialize desktop window (800x800) and raylib graphics context
+    BoardView view(800, 800);
+    view.init();
 
-    const ChessBoard& board = game.getBoard();
+    // 2. Initialize core chess engine state
+    ChessEngine engine;
 
-    std::cout << "64 Squares Phase 2\n";
-
-    const Piece* p = board.getPiece({7, 1});
-
-    if (p != nullptr &&
-        p->getType() == PieceType::Knight) {
-        std::cout << "Initial position: OK\n";
+    // 3. Main interactive application frame loop
+    while (!view.shouldClose()) {
+        view.processInput(engine);
+        view.render(engine);
     }
 
-    bool ok = game.tryMove({7, 1}, {5, 2});
-
-    std::cout << "Knight move: "
-              << (ok ? "Accepted" : "Rejected")
-              << '\n';
-
-    std::cout << "Black to move: "
-              << (game.getTurn() == Color::Black)
-              << '\n';
-
+    // 4. Clean up resources and close window
+    view.cleanup();
     return 0;
 }
