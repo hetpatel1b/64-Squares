@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(SixtyFourSquares
+project(sixty_four_squares
     VERSION 0.1.0
-    DESCRIPTION "64 Squares — C++ Chess Application"
-    LANGUAGES CXX
+    DESCRIPTION "64 Squares — C++ Chess Application using raylib"
+    LANGUAGES C CXX
 )
 
 # ------------------------------------------------------------------------------
@@ -14,69 +14,71 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ------------------------------------------------------------------------------
-# 2. Dependency Management: SFML 2.6.2 (Graphics, Window, System)
+# 2. Dependency Management: raylib 5.5
 # ------------------------------------------------------------------------------
-# Default to static libraries on Windows to eliminate missing runtime DLL errors.
-# Teammates can override with -DBUILD_SHARED_LIBS=ON if dynamic linking is preferred.
-option(BUILD_SHARED_LIBS "Build libraries as shared (DLLs on Windows)" OFF)
+# Streamline raylib build by disabling unneeded examples and games
+set(BUILD_EXAMPLES OFF CACHE BOOL "Disable raylib examples" FORCE)
+set(BUILD_GAMES OFF CACHE BOOL "Disable raylib games" FORCE)
 
-# Attempt to locate pre-installed SFML package; fallback to FetchContent from official repo
-find_package(SFML 2.6 COMPONENTS graphics window system QUIET)
+# Attempt to locate pre-installed raylib package; fallback to FetchContent from official repo release archive
+find_package(raylib 5.5 QUIET)
 
-if(NOT SFML_FOUND)
-    message(STATUS "SFML 2.6 not found locally. Fetching official SFML 2.6.2 release...")
+if(NOT raylib_FOUND)
+    message(STATUS "raylib 5.5 not found locally. Fetching official raylib 5.5 release archive...")
     include(FetchContent)
 
-    # Disable unused modules to streamline build times
-    set(SFML_BUILD_AUDIO OFF CACHE BOOL "Disable SFML audio module" FORCE)
-    set(SFML_BUILD_NETWORK OFF CACHE BOOL "Disable SFML network module" FORCE)
-    set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "Disable SFML examples" FORCE)
-    set(SFML_BUILD_DOC OFF CACHE BOOL "Disable SFML documentation" FORCE)
-
     FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG        2.6.2
-        GIT_SHALLOW    TRUE
+        raylib
+        URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
-    FetchContent_MakeAvailable(SFML)
+    FetchContent_MakeAvailable(raylib)
 endif()
 
 # ------------------------------------------------------------------------------
-# 3. Core Engine Library Target
+# 3. Core Engine Library Target (Headless, independent of graphics)
 # ------------------------------------------------------------------------------
-add_library(sixty_four_squares STATIC
+add_library(sixty_four_squares_core STATIC
     src/ChessBoard.cpp
     src/ChessEngine.cpp
 )
 
-# Target-scoped include paths
-target_include_directories(sixty_four_squares PUBLIC
+target_include_directories(sixty_four_squares_core PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-# Target-scoped compiler features
-target_compile_features(sixty_four_squares PUBLIC
+target_compile_features(sixty_four_squares_core PUBLIC
     cxx_std_17
 )
 
 # ------------------------------------------------------------------------------
-# 4. Development Application Target
+# 4. Graphical Application Target
 # ------------------------------------------------------------------------------
-add_executable(64Squares
+add_executable(sixty_four_squares
     src/main.cpp
+    src/BoardView.cpp
+    src/RaylibRenderer.cpp
 )
 
-target_link_libraries(64Squares PRIVATE
-    sixty_four_squares
+target_include_directories(sixty_four_squares PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
 )
 
-set_target_properties(64Squares PROPERTIES
-    OUTPUT_NAME "64Squares"
+target_compile_features(sixty_four_squares PRIVATE
+    cxx_std_17
+)
+
+target_link_libraries(sixty_four_squares PRIVATE
+    sixty_four_squares_core
+    raylib
+)
+
+set_target_properties(sixty_four_squares PROPERTIES
+    OUTPUT_NAME "sixty_four_squares"
 )
 
 # ------------------------------------------------------------------------------
-# 5. Automated Tests Target
+# 5. Automated Tests Target (Headless)
 # ------------------------------------------------------------------------------
 enable_testing()
 
@@ -84,8 +86,12 @@ add_executable(sixty_four_squares_tests
     tests/Phase2Tests.cpp
 )
 
+target_include_directories(sixty_four_squares_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
+
 target_link_libraries(sixty_four_squares_tests PRIVATE
-    sixty_four_squares
+    sixty_four_squares_core
 )
 
 set_target_properties(sixty_four_squares_tests PROPERTIES
@@ -94,16 +100,3 @@ set_target_properties(sixty_four_squares_tests PROPERTIES
 
 add_test(NAME "64Squares_Phase2_Tests" COMMAND sixty_four_squares_tests)
 set_tests_properties("64Squares_Phase2_Tests" PROPERTIES LABELS "64 Squares")
-
-# ------------------------------------------------------------------------------
-# 6. Runtime DLL Deployment (Only active when BUILD_SHARED_LIBS is ON)
-# ------------------------------------------------------------------------------
-if(BUILD_SHARED_LIBS AND TARGET sfml-graphics)
-    add_custom_command(TARGET 64Squares POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:64Squares>
-            $<TARGET_FILE_DIR:64Squares>
-        COMMAND_EXPAND_LISTS
-        COMMENT "Copying runtime shared library DLLs to executable directory..."
-    )
-endif()
