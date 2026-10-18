@@ -71,6 +71,18 @@ void BoardView::processInput(ChessEngine& engine) {
         const Piece* clickedPiece = board.getPiece(clickedPos);
         Color turn = engine.getTurn();
 
+        // If game is already over, prevent further moves
+        if (engine.isGameOver()) {
+            if (engine.isCheckmate()) {
+                std::string winner = (engine.getWinner() == Color::White) ? "White" : "Black";
+                statusMessage = "Game over — Checkmate! " + winner + " wins! Press [R] to restart.";
+            } else {
+                statusMessage = "Game over — Stalemate! Press [R] to restart.";
+            }
+            selectedPos.reset();
+            return;
+        }
+
         if (!selectedPos.has_value()) {
             if (clickedPiece != nullptr) {
                 if (clickedPiece->getColor() == turn) {
@@ -94,7 +106,17 @@ void BoardView::processInput(ChessEngine& engine) {
                 bool moved = engine.tryMove(from, clickedPos);
 
                 if (moved) {
-                    statusMessage = pieceDesc + " moved: " + formatSquare(from) + " -> " + formatSquare(clickedPos);
+                    if (engine.isCheckmate()) {
+                        std::string winner = (engine.getWinner() == Color::White) ? "White" : "Black";
+                        statusMessage = "Checkmate! " + winner + " wins!";
+                    } else if (engine.isStalemate()) {
+                        statusMessage = "Stalemate! Game is a draw.";
+                    } else if (engine.isInCheck(engine.getTurn())) {
+                        std::string side = (engine.getTurn() == Color::White) ? "White" : "Black";
+                        statusMessage = pieceDesc + " moved: " + formatSquare(from) + " -> " + formatSquare(clickedPos) + " (Check!)";
+                    } else {
+                        statusMessage = pieceDesc + " moved: " + formatSquare(from) + " -> " + formatSquare(clickedPos);
+                    }
                     selectedPos.reset();
                 } else {
                     statusMessage = "Illegal move rejected for " + pieceDesc;
@@ -111,10 +133,20 @@ void BoardView::render(const ChessEngine& engine) {
     int selRow = selectedPos.has_value() ? selectedPos->row : -1;
     int selCol = selectedPos.has_value() ? selectedPos->col : -1;
 
+    // Highlight king square when in check
+    int checkRow = -1, checkCol = -1;
+    if (engine.isInCheck(engine.getTurn())) {
+        auto kingPos = engine.findKing(engine.getTurn());
+        if (kingPos.has_value()) {
+            checkRow = kingPos->row;
+            checkCol = kingPos->col;
+        }
+    }
+
     renderer.beginDrawing();
 
-    // 1. Draw chessboard grid and coordinates
-    renderer.drawBoard(selRow, selCol, hoverRow, hoverCol);
+    // 1. Draw chessboard grid, highlights, and coordinates
+    renderer.drawBoard(selRow, selCol, hoverRow, hoverCol, checkRow, checkCol);
 
     // 2. Draw all pieces currently on board
     const ChessBoard& board = engine.getBoard();
@@ -137,8 +169,19 @@ void BoardView::render(const ChessEngine& engine) {
         }
     }
 
-    // 3. Draw header and status UI
-    std::string turnText = (engine.getTurn() == Color::White) ? "White to move" : "Black to move";
+    // 3. Draw header, turn indicator, and status UI
+    std::string turnText;
+    if (engine.isCheckmate()) {
+        std::string winner = (engine.getWinner() == Color::White) ? "White" : "Black";
+        turnText = "Checkmate! " + winner + " wins!";
+    } else if (engine.isStalemate()) {
+        turnText = "Stalemate! Game Draw";
+    } else if (engine.isInCheck(engine.getTurn())) {
+        turnText = (engine.getTurn() == Color::White) ? "White in check!" : "Black in check!";
+    } else {
+        turnText = (engine.getTurn() == Color::White) ? "White to move" : "Black to move";
+    }
+
     renderer.drawUI(turnText, engine.getTurn() == Color::White, statusMessage);
 
     renderer.endDrawing();

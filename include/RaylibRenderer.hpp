@@ -22,7 +22,7 @@ public:
     void endDrawing();
 
     // Board & pieces rendering
-    void drawBoard(int selectedRow = -1, int selectedCol = -1, int hoverRow = -1, int hoverCol = -1);
+    void drawBoard(int selectedRow = -1, int selectedCol = -1, int hoverRow = -1, int hoverCol = -1, int checkRow = -1, int checkCol = -1);
     void drawPiece(int row, int col, char type, bool isWhite);
     void drawUI(const std::string& turnText, bool isWhiteTurn, const std::string& statusMessage);
 

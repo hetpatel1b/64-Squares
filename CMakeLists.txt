@@ -100,3 +100,24 @@ set_target_properties(sixty_four_squares_tests PROPERTIES
 
 add_test(NAME "64Squares_Phase2_Tests" COMMAND sixty_four_squares_tests)
 set_tests_properties("64Squares_Phase2_Tests" PROPERTIES LABELS "64 Squares")
+
+# Phase 3 Automated Tests Target (Headless)
+add_executable(sixty_four_squares_phase3_tests
+    tests/Phase3Tests.cpp
+)
+
+target_include_directories(sixty_four_squares_phase3_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+target_link_libraries(sixty_four_squares_phase3_tests PRIVATE
+    sixty_four_squares_core
+)
+
+set_target_properties(sixty_four_squares_phase3_tests PROPERTIES
+    OUTPUT_NAME "sixty_four_squares_phase3_tests"
+)
+
+add_test(NAME "64Squares_Phase3_Tests" COMMAND sixty_four_squares_phase3_tests)
+set_tests_properties("64Squares_Phase3_Tests" PROPERTIES LABELS "64 Squares")
+

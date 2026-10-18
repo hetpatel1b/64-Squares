@@ -118,7 +118,7 @@ void RaylibRenderer::endDrawing() {
     EndDrawing();
 }
 
-void RaylibRenderer::drawBoard(int selectedRow, int selectedCol, int hoverRow, int hoverCol) {
+void RaylibRenderer::drawBoard(int selectedRow, int selectedCol, int hoverRow, int hoverCol, int checkRow, int checkCol) {
     ClearBackground(CLITERAL(Color){ 24, 26, 32, 255 });
 
     const Color lightSquare = CLITERAL(Color){ 240, 217, 181, 255 };
@@ -147,6 +147,22 @@ void RaylibRenderer::drawBoard(int selectedRow, int selectedCol, int hoverRow, i
             Color sqColor = isLight ? lightSquare : darkSquare;
 
             DrawRectangle(sqX, sqY, pImpl->squareSize, pImpl->squareSize, sqColor);
+
+            // Check highlight for King in check
+            if (r == checkRow && c == checkCol) {
+                DrawRectangle(sqX, sqY, pImpl->squareSize, pImpl->squareSize,
+                              CLITERAL(Color){ 235, 60, 60, 150 });
+                DrawRectangleLinesEx(
+                    CLITERAL(Rectangle){
+                        static_cast<float>(sqX),
+                        static_cast<float>(sqY),
+                        static_cast<float>(pImpl->squareSize),
+                        static_cast<float>(pImpl->squareSize)
+                    },
+                    3.0f,
+                    CLITERAL(Color){ 220, 20, 20, 255 }
+                );
+            }
 
             // Hover highlight
             if (r == hoverRow && c == hoverCol) {

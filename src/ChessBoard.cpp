@@ -34,9 +34,51 @@ const Piece* ChessBoard::getPiece(Position p) const {
     return squares[p.row][p.col].get();
 }
 
+void ChessBoard::setPiece(Position p, std::unique_ptr<Piece> piece) {
+    if (!isInside(p))
+        return;
+
+    squares[p.row][p.col] = std::move(piece);
+}
+
 void ChessBoard::movePiece(Position from, Position to) {
-    squares[to.row][to.col] =
-        std::move(squares[from.row][from.col]);
+    applyMove(from, to);
+}
+
+MoveRecord ChessBoard::applyMove(Position from, Position to) {
+    MoveRecord record;
+    record.from = from;
+    record.to = to;
+
+    if (isInside(to)) {
+        record.capturedPiece = std::move(squares[to.row][to.col]);
+    }
+    if (isInside(from) && isInside(to)) {
+        squares[to.row][to.col] = std::move(squares[from.row][from.col]);
+    }
+
+    return record;
+}
+
+void ChessBoard::undoMove(MoveRecord record) {
+    if (isInside(record.from) && isInside(record.to)) {
+        squares[record.from.row][record.from.col] = std::move(squares[record.to.row][record.to.col]);
+        squares[record.to.row][record.to.col] = std::move(record.capturedPiece);
+    }
+}
+
+std::optional<Position> ChessBoard::findKing(Color color) const {
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            const Piece* piece = squares[r][c].get();
+            if (piece != nullptr &&
+                piece->getColor() == color &&
+                piece->getType() == PieceType::King) {
+                return Position{r, c};
+            }
+        }
+    }
+    return std::nullopt;
 }
 
 void ChessBoard::setupInitialPosition() {
