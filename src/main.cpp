@@ -1,18 +1,18 @@
 #include "BoardView.hpp"
-#include "ChessEngine.hpp"
+#include "EngineAdapter.hpp"
 
 int main() {
-    // 1. Initialize desktop window (800x800) and raylib graphics context
-    BoardView view(800, 800);
-    view.init();
+    // 1. Initialize core chess engine adapter conforming to IChessGame interface
+    auto game = std::make_shared<EngineAdapter>();
 
-    // 2. Initialize core chess engine state
-    ChessEngine engine;
+    // 2. Initialize desktop window (1100x750, resizable) and raylib presentation view
+    BoardView view(game, 1100, 750);
+    view.init();
 
     // 3. Main interactive application frame loop
     while (!view.shouldClose()) {
-        view.processInput(engine);
-        view.render(engine);
+        view.processInput();
+        view.render();
     }
 
     // 4. Clean up resources and close window

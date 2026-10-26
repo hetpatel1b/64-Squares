@@ -6,12 +6,18 @@ project(sixty_four_squares
     LANGUAGES C CXX
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # ------------------------------------------------------------------------------
 # 1. C++ Standard Specification
 # ------------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
+endif()
 
 # ------------------------------------------------------------------------------
 # 2. Dependency Management: raylib 5.5
@@ -58,6 +64,7 @@ add_executable(sixty_four_squares
     src/main.cpp
     src/BoardView.cpp
     src/RaylibRenderer.cpp
+    src/EngineAdapter.cpp
 )
 
 target_include_directories(sixty_four_squares PRIVATE
@@ -120,4 +127,25 @@ set_target_properties(sixty_four_squares_phase3_tests PROPERTIES
 
 add_test(NAME "64Squares_Phase3_Tests" COMMAND sixty_four_squares_phase3_tests)
 set_tests_properties("64Squares_Phase3_Tests" PROPERTIES LABELS "64 Squares")
+
+# Phase 4 UI Integration Tests Target (Headless)
+add_executable(sixty_four_squares_phase4_tests
+    tests/Phase4UITests.cpp
+    src/EngineAdapter.cpp
+)
+
+target_include_directories(sixty_four_squares_phase4_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+target_link_libraries(sixty_four_squares_phase4_tests PRIVATE
+    sixty_four_squares_core
+)
+
+set_target_properties(sixty_four_squares_phase4_tests PROPERTIES
+    OUTPUT_NAME "sixty_four_squares_phase4_tests"
+)
+
+add_test(NAME "64Squares_Phase4_Tests" COMMAND sixty_four_squares_phase4_tests)
+set_tests_properties("64Squares_Phase4_Tests" PROPERTIES LABELS "64 Squares")
 
